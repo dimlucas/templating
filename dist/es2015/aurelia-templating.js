@@ -3631,6 +3631,12 @@ export let HtmlBehaviorResource = class HtmlBehaviorResource {
   register(registry, name) {
     if (this.attributeName !== null) {
       registry.registerAttribute(name || this.attributeName, this, this.attributeName);
+
+      if (Array.isArray(this.aliases)) {
+        this.aliases.forEach(alias => {
+          registry.registerAttribute(alias, this, this.attributeName);
+        });
+      }
     }
 
     if (this.elementName !== null) {
@@ -4334,11 +4340,12 @@ export function customElement(name) {
   };
 }
 
-export function customAttribute(name, defaultBindingMode) {
+export function customAttribute(name, defaultBindingMode, aliases) {
   return function (target) {
     let r = metadata.getOrCreateOwn(metadata.resource, HtmlBehaviorResource, target);
     r.attributeName = validateBehaviorName(name, 'custom attribute');
     r.attributeDefaultBindingMode = defaultBindingMode;
+    r.aliases = aliases;
   };
 }
 
@@ -4520,6 +4527,10 @@ export let TemplatingEngine = (_dec11 = inject(Container, ModuleAnalyzer, ViewCo
     let view = factory.create(container, BehaviorInstruction.enhance());
 
     view.bind(instruction.bindingContext || {}, instruction.overrideContext);
+
+    view.firstChild = view.lastChild = view.fragment;
+    view.fragment = DOM.createDocumentFragment();
+    view.attached();
 
     return view;
   }

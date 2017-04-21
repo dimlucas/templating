@@ -3930,8 +3930,16 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
     };
 
     HtmlBehaviorResource.prototype.register = function register(registry, name) {
+      var _this13 = this;
+
       if (this.attributeName !== null) {
         registry.registerAttribute(name || this.attributeName, this, this.attributeName);
+
+        if (Array.isArray(this.aliases)) {
+          this.aliases.forEach(function (alias) {
+            registry.registerAttribute(alias, _this13, _this13.attributeName);
+          });
+        }
       }
 
       if (this.elementName !== null) {
@@ -3940,7 +3948,7 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
     };
 
     HtmlBehaviorResource.prototype.load = function load(container, target, loadContext, viewStrategy, transientView) {
-      var _this12 = this;
+      var _this14 = this;
 
       var options = void 0;
 
@@ -3953,8 +3961,8 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
         }
 
         return viewStrategy.loadViewFactory(container.get(ViewEngine), options, loadContext, target).then(function (viewFactory) {
-          if (!transientView || !_this12.viewFactory) {
-            _this12.viewFactory = viewFactory;
+          if (!transientView || !_this14.viewFactory) {
+            _this14.viewFactory = viewFactory;
           }
 
           return viewFactory;
@@ -4509,27 +4517,27 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
     };
 
     CompositionEngine.prototype._createControllerAndSwap = function _createControllerAndSwap(context) {
-      var _this14 = this;
+      var _this15 = this;
 
       return this.createController(context).then(function (controller) {
         controller.automate(context.overrideContext, context.owningView);
 
         if (context.compositionTransactionOwnershipToken) {
           return context.compositionTransactionOwnershipToken.waitForCompositionComplete().then(function () {
-            return _this14._swap(context, controller.view);
+            return _this15._swap(context, controller.view);
           }).then(function () {
             return controller;
           });
         }
 
-        return _this14._swap(context, controller.view).then(function () {
+        return _this15._swap(context, controller.view).then(function () {
           return controller;
         });
       });
     };
 
     CompositionEngine.prototype.createController = function createController(context) {
-      var _this15 = this;
+      var _this16 = this;
 
       var childContainer = void 0;
       var viewModel = void 0;
@@ -4542,7 +4550,7 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
         viewModelResource = context.viewModelResource;
         m = viewModelResource.metadata;
 
-        var viewStrategy = _this15.viewLocator.getViewStrategy(context.view || viewModel);
+        var viewStrategy = _this16.viewLocator.getViewStrategy(context.view || viewModel);
 
         if (context.viewResources) {
           viewStrategy.makeRelativeTo(context.viewResources.viewUrl);
@@ -4582,7 +4590,7 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
     };
 
     CompositionEngine.prototype.compose = function compose(context) {
-      var _this16 = this;
+      var _this17 = this;
 
       context.childContainer = context.childContainer || context.container.createChild();
       context.view = this.viewLocator.getViewStrategy(context.view);
@@ -4609,13 +4617,13 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
 
           if (context.compositionTransactionOwnershipToken) {
             return context.compositionTransactionOwnershipToken.waitForCompositionComplete().then(function () {
-              return _this16._swap(context, result);
+              return _this17._swap(context, result);
             }).then(function () {
               return result;
             });
           }
 
-          return _this16._swap(context, result).then(function () {
+          return _this17._swap(context, result).then(function () {
             return result;
           });
         });
@@ -4686,11 +4694,12 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
     };
   }
 
-  function customAttribute(name, defaultBindingMode) {
+  function customAttribute(name, defaultBindingMode, aliases) {
     return function (target) {
       var r = _aureliaMetadata.metadata.getOrCreateOwn(_aureliaMetadata.metadata.resource, HtmlBehaviorResource, target);
       r.attributeName = validateBehaviorName(name, 'custom attribute');
       r.attributeDefaultBindingMode = defaultBindingMode;
+      r.aliases = aliases;
     };
   }
 
@@ -4877,6 +4886,10 @@ define(['exports', 'aurelia-logging', 'aurelia-metadata', 'aurelia-pal', 'aureli
       var view = factory.create(container, BehaviorInstruction.enhance());
 
       view.bind(instruction.bindingContext || {}, instruction.overrideContext);
+
+      view.firstChild = view.lastChild = view.fragment;
+      view.fragment = _aureliaPal.DOM.createDocumentFragment();
+      view.attached();
 
       return view;
     };
