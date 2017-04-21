@@ -3873,14 +3873,14 @@ export var HtmlBehaviorResource = function () {
   };
 
   HtmlBehaviorResource.prototype.register = function register(registry, name) {
-    var _this13 = this;
+    var _this12 = this;
 
     if (this.attributeName !== null) {
       registry.registerAttribute(name || this.attributeName, this, this.attributeName);
 
       if (Array.isArray(this.aliases)) {
         this.aliases.forEach(function (alias) {
-          registry.registerAttribute(alias, _this13, _this13.attributeName);
+          registry.registerAttribute(alias, _this12, _this12.attributeName);
         });
       }
     }
@@ -3891,7 +3891,7 @@ export var HtmlBehaviorResource = function () {
   };
 
   HtmlBehaviorResource.prototype.load = function load(container, target, loadContext, viewStrategy, transientView) {
-    var _this14 = this;
+    var _this13 = this;
 
     var options = void 0;
 
@@ -3904,8 +3904,8 @@ export var HtmlBehaviorResource = function () {
       }
 
       return viewStrategy.loadViewFactory(container.get(ViewEngine), options, loadContext, target).then(function (viewFactory) {
-        if (!transientView || !_this14.viewFactory) {
-          _this14.viewFactory = viewFactory;
+        if (!transientView || !_this13.viewFactory) {
+          _this13.viewFactory = viewFactory;
         }
 
         return viewFactory;
@@ -4098,7 +4098,7 @@ export var HtmlBehaviorResource = function () {
   };
 
   HtmlBehaviorResource.prototype._copyInheritedProperties = function _copyInheritedProperties(container, target) {
-    var _this13 = this;
+    var _this14 = this;
 
     var behavior = void 0,
         derived = target;
@@ -4118,13 +4118,13 @@ export var HtmlBehaviorResource = function () {
     var _loop = function _loop(_i8, _ii8) {
       var prop = behavior.properties[_i8];
 
-      if (_this13.properties.some(function (p) {
+      if (_this14.properties.some(function (p) {
         return p.name === prop.name;
       })) {
         return 'continue';
       }
 
-      new BindableProperty(prop).registerWith(derived, _this13);
+      new BindableProperty(prop).registerWith(derived, _this14);
     };
 
     for (var _i8 = 0, _ii8 = behavior.properties.length; _i8 < _ii8; ++_i8) {
